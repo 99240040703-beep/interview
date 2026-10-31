@@ -105,8 +105,13 @@ export async function POST(req: Request) {
        * from running during the Next.js build.
        */
       if (lowerName.endsWith('.pdf')) {
-        const pdfModule = await import('pdf-parse');
-        const pdfParse = pdfModule.default;
+        // Import the parser implementation directly. pdf-parse@1.1.1's
+        // package entrypoint runs a bundled test-file check in some Next.js
+        // server bundles, which tries to read ./test/data/05-versions-space.pdf.
+        // That fixture is not shipped in production deployments.
+        // @ts-expect-error pdf-parse does not publish types for this internal entrypoint.
+        const pdfModule = await import('pdf-parse/lib/pdf-parse.js');
+        const pdfParse = pdfModule.default as (input: Buffer) => Promise<{ text: string }>;
 
         const parsed = await pdfParse(buffer);
         text = parsed.text;
