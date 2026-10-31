@@ -14,6 +14,7 @@ export default function SkillPathAgentPage() {
   const [code,setCode] = useState('');
   const [stdin,setStdin] = useState('');
   const [answer,setAnswer] = useState('');
+  const [history,setHistory] = useState<{role:'user'|'assistant';content:string}[]>([]);
   const [nextSteps,setNextSteps] = useState<string[]>([]);
   const [suggestions,setSuggestions] = useState<string[]>([]);
   const [busy,setBusy] = useState(false);
@@ -25,9 +26,9 @@ export default function SkillPathAgentPage() {
   async function ask(action=mode, prompt=message) {
     setBusy(true); setError(''); setAnswer(''); setOutput('');
     try {
-      const r = await fetch('/api/skillpath/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({courseId,topicId,mode:action,message:prompt,language,code})});
+      const r = await fetch('/api/skillpath/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({courseId,topicId,mode:action,message:prompt,language,code,history:history.slice(-8)})});
       const d = await r.json(); if(!r.ok) throw new Error(d.error || 'Agent request failed.');
-      setAnswer(d.answer || ''); setNextSteps(d.nextSteps || []); setSuggestions(d.suggestions || []);
+      setAnswer(d.answer || ''); setNextSteps(d.nextSteps || []); setSuggestions(d.suggestions || []); setHistory([...history,{role:'user',content:prompt || 'Build my course plan / suggest next steps.'},{role:'assistant',content:d.answer || ''}].slice(-8));
       if(d.code) setCode(d.code); setMessage('');
     } catch(e:any) { setError(e.message || 'Could not contact the agent.'); }
     finally { setBusy(false); }
