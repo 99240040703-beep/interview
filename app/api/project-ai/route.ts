@@ -49,6 +49,34 @@ export async function POST(req: Request) {
     }
 
     const systemPrompt = buildSystemPrompt(course, moduleTitle, topicTitle, projectName);
+    const ollamaUrl = process.env.OLLAMA_BASE_URL?.trim().replace(/\/$/, '');
+    const ollamaToken = process.env.OLLAMA_API_KEY?.trim();
+    if (ollamaUrl) {
+      try {
+        const response = await fetch(`${ollamaUrl}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(ollamaToken ? { Authorization: `Bearer ${ollamaToken}` } : {}) },
+          body: JSON.stringify({
+            model: process.env.OLLAMA_MODEL?.trim() || 'llama3.2:3b',
+            messages: [{ role: 'system', content: systemPrompt }, ...messages],
+            stream: false,
+          }),
+          signal: AbortSignal.timeout(90000),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          console.error('Project AI Ollama error', response.status, data?.error || 'unknown');
+          return NextResponse.json({ error: 'Your local AI service could not be reached. Check that Ollama and its secure tunnel are running.', code: 'OLLAMA_UNAVAILABLE' }, { status: 503 });
+        }
+        const answer = data?.message?.content?.trim();
+        if (answer) return NextResponse.json({ answer, provider: 'Local Ollama' });
+        return NextResponse.json({ error: 'The local AI model returned an empty answer. Check the model name.', code: 'OLLAMA_EMPTY_RESPONSE' }, { status: 503 });
+      } catch (error: any) {
+        console.error('Project AI Ollama connection error', error?.message || error);
+        return NextResponse.json({ error: 'Cannot connect to your computer’s local AI. Start Ollama and its secure tunnel, then try again.', code: 'OLLAMA_UNAVAILABLE' }, { status: 503 });
+      }
+    }
+
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const openaiKey = process.env.OPENAI_API_KEY?.trim();
 
@@ -98,7 +126,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({
-      error: 'Project AI is not configured. Add GEMINI_API_KEY to the Render service environment variables, then redeploy. Keep the key private.',
+      error: 'No AI provider is configured. Set OLLAMA_BASE_URL for your local Ollama gateway, or configure GEMINI_API_KEY in Render.',
       code: 'AI_NOT_CONFIGURED',
     }, { status: 503 });
   } catch (error: any) {
