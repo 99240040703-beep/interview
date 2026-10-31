@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 type Data={user:{name:string;email:string;targetRole:string;department?:string};stats:{learning:number;practice:number;interview:number;resume:number;readiness:number};progress:{topic:string;score:number}[]};
-const links=[['Overview','/dashboard'],['Courses & Coding','/skillpath'],['All learning','/learn'],['Practice','/practice'],['AI Assistant','/assistant'],['AI Tutor & Coach','/ai-coach'],['Mock Interview','/mock-interview'],['Resume Analyzer','/resume'],['Placement Readiness','/placement'],['My Notes','/notes']];
+const links=[['Overview','/dashboard'],['Courses & Coding','/skillpath'],['All learning','/learn'],['Practice','/practice'],['AI Assistant','/assistant'],['Project AI','/project-ai'],['AI Tutor & Coach','/ai-coach'],['Mock Interview','/mock-interview'],['Resume Analyzer','/resume'],['Placement Readiness','/placement'],['My Notes','/notes']];
 export default function Dashboard(){
  const pathname=usePathname();const[data,setData]=useState<Data|null>(null);const[loading,setLoading]=useState(true);
  useEffect(()=>{fetch('/api/dashboard').then(r=>r.ok?r.json():null).then(setData).finally(()=>setLoading(false));},[]);
