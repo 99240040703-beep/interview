@@ -4,23 +4,23 @@ export type Course = { id:string; title:string; category:string; level:string; d
 const topic=(course:string,title:string,i:number):Topic=>{
  const web=/web|frontend|full-stack|backend/i.test(course), py=course==="python", java=course==="java", c=course==="c", dsa=course==="dsa";
  const langExamples:Record<string,string>={
- cpp:"#include <iostream>\\nusing namespace std;\\nint main(){ int values[]={10,20,30}; int total=0; for(int x:values) total+=x; cout<<total<<endl; }",
- javascript:"const values = [10, 20, 30];\\nconsole.log(values.reduce((sum, value) => sum + value, 0));",
- typescript:"const values: number[] = [10, 20, 30];\\nconsole.log(values.reduce((sum, value) => sum + value, 0));",
- csharp:"using System;\\nclass Program { static void Main(){ int[] values={10,20,30}; Console.WriteLine(Array.Sum(values)); } }",
- go:"package main\\nimport \\"fmt\\"\\nfunc main(){ values:=[]int{10,20,30}; total:=0; for _,v:=range values { total+=v }; fmt.Println(total) }",
- rust:"fn main(){ let values=[10,20,30]; let total:i32=values.iter().sum(); println!(\\"{}\\",total); }",
- php:"<?php\\n$values = [10, 20, 30];\\necho array_sum($values) . PHP_EOL;",
- ruby:"values = [10, 20, 30]\\nputs values.sum",
+ cpp:"#include <iostream>\nusing namespace std;\nint main(){ int values[]={10,20,30}; int total=0; for(int x:values) total+=x; cout<<total<<endl; }",
+ javascript:"const values = [10, 20, 30];\nconsole.log(values.reduce((sum, value) => sum + value, 0));",
+ typescript:"const values: number[] = [10, 20, 30];\nconsole.log(values.reduce((sum, value) => sum + value, 0));",
+ csharp:"using System;\nclass Program { static void Main(){ int[] values={10,20,30}; Console.WriteLine(values.Sum()); } }",
+ go:"package main\nimport \"fmt\"\nfunc main(){ values:=[]int{10,20,30}; total:=0; for _,v:=range values { total+=v }; fmt.Println(total) }",
+ rust:"fn main(){ let values=[10,20,30]; let total:i32=values.iter().sum(); println!(\"{}\",total); }",
+ php:"<?php\n$values = [10, 20, 30];\necho array_sum($values) . PHP_EOL;",
+ ruby:"values = [10, 20, 30]\nputs values.sum",
  kotlin:"fun main(){ val values=listOf(10,20,30); println(values.sum()) }",
- swift:"let values = [10, 20, 30]\\nprint(values.reduce(0, +))"
+ swift:"let values = [10, 20, 30]\nprint(values.reduce(0, +))"
  };
  const example=web?(title.toLowerCase().includes("html")?'<!doctype html>\n<html><head><title>My page</title></head><body><h1>Hello, web!</h1></body></html>':title.toLowerCase().includes("css")?".card { display: flex; gap: 1rem; padding: 1rem; }":title.toLowerCase().includes("react")?'function Welcome({ name }) { return <h1>Hello, {name}</h1>; }':"const message = 'Hello, web!';\nconsole.log(message);")
  :py?"def total(values):\n    return sum(values)\n\nprint(total([10, 20, 30]))"
  :java?"public class Main {\n  public static void main(String[] args) {\n    int[] values = {10, 20, 30};\n    int total = 0;\n    for (int value : values) total += value;\n    System.out.println(total);\n  }\n}"
  :c?"#include <stdio.h>\nint main(void) {\n  int values[] = {10, 20, 30}, total = 0;\n  for (int i = 0; i < 3; i++) total += values[i];\n  printf(\"%d\\n\", total);\n  return 0;\n}"
  :dsa?"function search(values, target) {\n  for (let i = 0; i < values.length; i++) if (values[i] === target) return i;\n  return -1;\n}\nconsole.log(search([4, 8, 2], 8));"
- :"SELECT department, COUNT(*) FROM students GROUP BY department;";
+ :langExamples[course]||"SELECT department, COUNT(*) FROM students GROUP BY department;";
  return {id:course+"-"+(i+1),title,objective:"Explain "+title+", describe when it is useful, and apply it to a small practical problem.",theory:[
  title+" is a core concept in "+course+". Begin with the problem it solves and the role it plays in a complete application or engineering workflow.",
  "How it works: identify the inputs, apply the concept's rules in a clear sequence, and inspect the result. Trace a small example manually before implementing it.",
