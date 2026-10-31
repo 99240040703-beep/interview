@@ -27,12 +27,12 @@ const sectionPatterns: {name:string; aliases:string[]; weight:number; advice:str
   {name:'Additional Information',aliases:['activities','leadership','volunteering','languages','interests'],weight:5,advice:'Include relevant leadership, volunteering, languages or community contributions.'}
 ];
 function hasHeading(text:string, aliases:string[]) {
-  return aliases.some((a) => new RegExp('(^|\\n|\\s)' + a.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\$&') + '(\\s|:|$)', 'i').test(text));
+  return aliases.some((a) => new RegExp('(^|\\n|\\s)' + a.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&') + '(\\s|:|$)', 'i').test(text));
 }
 function analyze(text:string, targetRole:string) {
   const lower=text.toLowerCase();
   const wordCount=(text.match(/\\b[\\w+#.-]+\\b/g)||[]).length;
-  const found=allSkills.filter(s=>new RegExp('(^|[^a-z0-9+#.])'+s.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\$&')+'([^a-z0-9+#.]|$)','i').test(text));
+  const found=allSkills.filter(s=>new RegExp('(^|[^a-z0-9+#.])'+s.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')+'([^a-z0-9+#.]|$)','i').test(text));
   const groups=Object.entries(skillGroups).map(([name,items])=>({name,skills:found.filter(s=>items.includes(s))})).filter(g=>g.skills.length);
   const sections=sectionPatterns.map(s=>({name:s.name,present:hasHeading(text,s.aliases),weight:s.weight,advice:s.advice}));
   const present=sections.filter(s=>s.present);
