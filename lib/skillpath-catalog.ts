@@ -7,7 +7,7 @@ const topic=(course:string,title:string,i:number):Topic=>{
  cpp:"#include <iostream>\nusing namespace std;\nint main(){ int values[]={10,20,30}; int total=0; for(int x:values) total+=x; cout<<total<<endl; }",
  javascript:"const values = [10, 20, 30];\nconsole.log(values.reduce((sum, value) => sum + value, 0));",
  typescript:"const values: number[] = [10, 20, 30];\nconsole.log(values.reduce((sum, value) => sum + value, 0));",
- csharp:"using System;\nclass Program { static void Main(){ int[] values={10,20,30}; Console.WriteLine(values.Sum()); } }",
+ csharp:"using System;\nusing System.Linq;\nclass Program { static void Main(){ int[] values={10,20,30}; Console.WriteLine(values.Sum()); } }",
  go:"package main\nimport \"fmt\"\nfunc main(){ values:=[]int{10,20,30}; total:=0; for _,v:=range values { total+=v }; fmt.Println(total) }",
  rust:"fn main(){ let values=[10,20,30]; let total:i32=values.iter().sum(); println!(\"{}\",total); }",
  php:"<?php\n$values = [10, 20, 30];\necho array_sum($values) . PHP_EOL;",
@@ -106,5 +106,14 @@ make("swift","Swift Programming","Programming Languages","Beginner → Advanced"
 "cloud":[["What is IaaS versus PaaS?",["infrastructure","platform","service"],"IaaS provides infrastructure; PaaS provides a managed application platform."],["What does a container package?",["application","dependencies","environment"],"A container packages an application and its dependencies."],["What is CI/CD?",["continuous","integration","delivery","deployment"],"CI/CD automates integration, testing and delivery."],["Why use environment variables?",["configuration","secret","environment"],"They separate deployment configuration from source code."],["What is a health check?",["healthy","status","service"],"A health check reports whether a service is ready and functioning."]],
 "cybersecurity":[["What does the CIA triad mean?",["confidentiality","integrity","availability"],"CIA stands for confidentiality, integrity and availability."],["Authentication versus authorization?",["identity","permission","access"],"Authentication verifies identity; authorization controls permissions."],["Why validate input?",["malicious","invalid","input"],"Validation rejects malformed or unsafe input."],["What is encryption?",["key","plaintext","ciphertext"],"Encryption transforms plaintext into ciphertext using a key."],["Why monitor logs?",["detect","incident","event"],"Logs help detect, investigate and respond to security events."]],
 "cloud-data":[["ETL versus ELT?",["extract","transform","load"],"ETL transforms before loading; ELT loads then transforms."],["Batch versus streaming?",["batch","continuous","event"],"Batch processes groups; streaming processes events continuously."],["Why validate data quality?",["accuracy","completeness","consistency"],"Quality checks catch inaccurate, incomplete or inconsistent data."],["What is orchestration?",["schedule","coordinate","workflow"],"Orchestration coordinates dependencies and execution of pipeline tasks."],["What is a data warehouse?",["analytical","query","integrated"],"A warehouse stores integrated data for analysis."]]};
+
+const languageQuestionSet=[
+ ["What is a variable and why is its type important?",["store","value","type"],"A variable stores a value; its type determines the operations and values it can represent."],
+ ["How does a conditional statement control program flow?",["if","condition","branch"],"A condition selects which branch of code executes."],
+ ["Why use functions or methods?",["reuse","parameter","return"],"Functions package reusable behavior and can accept parameters and return results."],
+ ["What is an array or collection?",["multiple","element","index"],"A collection stores multiple values that can be accessed or processed."],
+ ["How do you find and fix a runtime error?",["debug","test","error"],"Reproduce the error, inspect the failing state, isolate the cause and test the correction."]
+];
+for(const id of ["cpp","javascript","typescript","csharp","go","rust","php","ruby","kotlin","swift"]) QUESTIONS[id]=languageQuestionSet;
 export function courseById(id:string){return COURSES.find(c=>c.id===id);}
 export function topicById(courseId:string,id:string){const c=courseById(courseId);if(!c)return null;for(const m of c.modules){const t=m.topics.find(x=>x.id===id);if(t)return {course:c,module:m,topic:t};}return null;}
