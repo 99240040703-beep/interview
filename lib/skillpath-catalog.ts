@@ -3,6 +3,18 @@ export type Module = { id:string; title:string; topics:Topic[] };
 export type Course = { id:string; title:string; category:string; level:string; description:string; modules:Module[] };
 const topic=(course:string,title:string,i:number):Topic=>{
  const web=/web|frontend|full-stack|backend/i.test(course), py=course==="python", java=course==="java", c=course==="c", dsa=course==="dsa";
+ const langExamples:Record<string,string>={
+ cpp:"#include <iostream>\\nusing namespace std;\\nint main(){ int values[]={10,20,30}; int total=0; for(int x:values) total+=x; cout<<total<<endl; }",
+ javascript:"const values = [10, 20, 30];\\nconsole.log(values.reduce((sum, value) => sum + value, 0));",
+ typescript:"const values: number[] = [10, 20, 30];\\nconsole.log(values.reduce((sum, value) => sum + value, 0));",
+ csharp:"using System;\\nclass Program { static void Main(){ int[] values={10,20,30}; Console.WriteLine(Array.Sum(values)); } }",
+ go:"package main\\nimport \\"fmt\\"\\nfunc main(){ values:=[]int{10,20,30}; total:=0; for _,v:=range values { total+=v }; fmt.Println(total) }",
+ rust:"fn main(){ let values=[10,20,30]; let total:i32=values.iter().sum(); println!(\\"{}\\",total); }",
+ php:"<?php\\n$values = [10, 20, 30];\\necho array_sum($values) . PHP_EOL;",
+ ruby:"values = [10, 20, 30]\\nputs values.sum",
+ kotlin:"fun main(){ val values=listOf(10,20,30); println(values.sum()) }",
+ swift:"let values = [10, 20, 30]\\nprint(values.reduce(0, +))"
+ };
  const example=web?(title.toLowerCase().includes("html")?'<!doctype html>\n<html><head><title>My page</title></head><body><h1>Hello, web!</h1></body></html>':title.toLowerCase().includes("css")?".card { display: flex; gap: 1rem; padding: 1rem; }":title.toLowerCase().includes("react")?'function Welcome({ name }) { return <h1>Hello, {name}</h1>; }':"const message = 'Hello, web!';\nconsole.log(message);")
  :py?"def total(values):\n    return sum(values)\n\nprint(total([10, 20, 30]))"
  :java?"public class Main {\n  public static void main(String[] args) {\n    int[] values = {10, 20, 30};\n    int total = 0;\n    for (int value : values) total += value;\n    System.out.println(total);\n  }\n}"
@@ -15,7 +27,7 @@ const topic=(course:string,title:string,i:number):Topic=>{
  "When to use it: use this technique when it improves correctness, readability, reuse, performance or maintainability. Compare alternatives and explain the trade-offs.",
  "Common mistakes include skipping validation, ignoring edge cases, using unclear names, and testing only one normal input. Test empty, invalid, boundary and typical cases.",
  "Real-world application: combine this concept with documentation, testing, security and monitoring. A working example should be understandable to another developer."
- ],example,output:web?"A browser renders the expected content or component.":py||java||c?"60":dsa?"1":"A grouped result containing each category and its count.",exercise:"Build a small "+course+" example that demonstrates "+title+". Include a normal case and an edge case, test the result, and explain your approach.",interview:"Explain "+title+". What problem does it solve, when would you use it, and what trade-off or common mistake should you consider?"};
+ ],example,output:web?"A browser renders the expected content or component.":py||java||c||Boolean(langExamples[course])?"60":dsa?"1":"A grouped result containing each category and its count.",exercise:"Build a small "+course+" example that demonstrates "+title+". Include a normal case and an edge case, test the result, and explain your approach.",interview:"Explain "+title+". What problem does it solve, when would you use it, and what trade-off or common mistake should you consider?"};
 };
 const make=(id:string,title:string,category:string,level:string,description:string,groups:{title:string;topics:string[]}[]):Course=>({id,title,category,level,description,modules:groups.map((g,mi)=>({id:id+"-m"+mi,title:g.title,topics:g.topics.map((t,i)=>topic(id,t,mi*30+i))}))});
 export const COURSES:Course[]=[
