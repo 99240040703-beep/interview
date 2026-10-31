@@ -109,6 +109,7 @@ export default function AssistantPage() {
         {[
           ['Overview', '/dashboard'],
           ['AI Assistant', '/assistant'],
+          ['Project AI', '/project-ai'],
           ['AI Tutor & Coach', '/ai-coach'],
           ['Courses & Coding', '/skillpath'],
           ['All learning', '/learn'],
