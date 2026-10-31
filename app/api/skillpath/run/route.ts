@@ -27,7 +27,7 @@ export async function POST(req:Request){
   if(body.checkpoint===true){
    const courseId=String(body.courseId||''),topicId=String(body.topicId||'');
    if(!topicById(courseId,topicId))return NextResponse.json({error:'Invalid course checkpoint.'},{status:400});
-   const cases=[{input:'2 3\\n',expected:'5'},{input:'-4 9\\n',expected:'5'}];
+   const cases=[{input:'2 3\n',expected:'5'},{input:'-4 9\n',expected:'5'}];
    const results=[];
    for(const test of cases){
     const out=await execute(language,code,test.input);
