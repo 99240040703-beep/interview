@@ -15,13 +15,6 @@ export async function POST(req: Request) {
     }
 
     const apiKey = process.env.OPENAI_API_KEY?.trim();
-    if (!apiKey) {
-      return NextResponse.json({
-        error: 'The AI provider is not configured yet. Add OPENAI_API_KEY to the Render service environment variables, then redeploy.',
-        code: 'AI_NOT_CONFIGURED',
-      }, { status: 503 });
-    }
-
     const body = await req.json();
     const mode = body?.mode === 'education' ? 'education' : 'general';
     const rawMessages = Array.isArray(body?.messages) ? body.messages : [];
@@ -38,6 +31,41 @@ export async function POST(req: Request) {
     const systemPrompt = mode === 'education'
       ? 'You are SkillPath AI, a patient expert tutor. Teach any academic or technical subject clearly. Start with a simple explanation, then build step by step. Use examples, equations, small code examples, analogies, and short summaries when useful. For problem solving, show the reasoning and method, not only the final answer. Adapt to the learner level. If the user asks about a non-education topic, answer it normally. Be accurate and say when something is uncertain.'
       : 'You are SkillPath AI, a capable, friendly general-purpose assistant. Answer questions across education, science, technology, programming, writing, careers, daily life, and other appropriate topics. Give useful detail, clear structure, examples, and practical next steps. Do not pretend to have browsed the live web or performed actions you have not done. Be honest about uncertainty.';
+
+    const ollamaUrl = process.env.OLLAMA_BASE_URL?.trim().replace(/\/$/, '');
+    const ollamaToken = process.env.OLLAMA_API_KEY?.trim();
+    if (ollamaUrl) {
+      try {
+        const localResponse = await fetch(`${ollamaUrl}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(ollamaToken ? { Authorization: `Bearer ${ollamaToken}` } : {}) },
+          body: JSON.stringify({
+            model: process.env.OLLAMA_MODEL?.trim() || 'llama3.2:3b',
+            messages: [{ role: 'system', content: systemPrompt }, ...messages],
+            stream: false,
+          }),
+          signal: AbortSignal.timeout(90000),
+        });
+        const data = await localResponse.json().catch(() => ({}));
+        if (!localResponse.ok) {
+          console.error('SkillPath local AI error', localResponse.status, data?.error || 'unknown');
+          return NextResponse.json({ error: 'Your local AI service is unavailable. Check that Ollama and its secure tunnel are running.', code: 'OLLAMA_UNAVAILABLE' }, { status: 503 });
+        }
+        const answer = data?.message?.content?.trim();
+        if (!answer) return NextResponse.json({ error: 'The local model returned an empty answer. Check OLLAMA_MODEL.', code: 'OLLAMA_EMPTY_RESPONSE' }, { status: 503 });
+        return new Response(answer, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', 'X-AI-Provider': 'Local Ollama' } });
+      } catch (error: any) {
+        console.error('SkillPath local AI connection error', error?.message || error);
+        return NextResponse.json({ error: 'Cannot reach your computer’s local AI. Start Ollama and its secure tunnel, then retry.', code: 'OLLAMA_UNAVAILABLE' }, { status: 503 });
+      }
+    }
+
+    if (!apiKey) {
+      return NextResponse.json({
+        error: 'No AI provider is configured. Set OLLAMA_BASE_URL for your local Ollama gateway, or configure OPENAI_API_KEY.',
+        code: 'AI_NOT_CONFIGURED',
+      }, { status: 503 });
+    }
 
     const client = new OpenAI({ apiKey });
     const stream = await client.chat.completions.create({
