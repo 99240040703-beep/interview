@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { getSessionUserId } from '@/lib/auth';
-import { courseById, topicById } from '@/lib/skillpath-catalog';
+import { courseById } from '@/lib/skillpath-catalog';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -31,8 +31,12 @@ export async function POST(req: Request) {
     const course = courseById(courseId);
     if (!course) return NextResponse.json({ error: 'Choose a valid project or learning track.' }, { status: 400 });
 
-    const moduleTitle = String(body?.moduleTitle || '').slice(0, 180);
-    const topicTitle = String(body?.topicTitle || '').slice(0, 180);
+    const requestedModule = String(body?.moduleTitle || '').slice(0, 180);
+    const requestedTopic = String(body?.topicTitle || '').slice(0, 180);
+    const matchedModule = course.modules.find((m: any) => m.title === requestedModule);
+    const matchedTopic = matchedModule?.topics.find((t: any) => t.title === requestedTopic);
+    const moduleTitle = matchedModule?.title || '';
+    const topicTitle = matchedTopic?.title || '';
     const projectName = String(body?.projectName || course.title).slice(0, 180);
     const messages: Message[] = (Array.isArray(body?.messages) ? body.messages : [])
       .filter((m: any) => (m?.role === 'user' || m?.role === 'assistant') && typeof m?.content === 'string')
