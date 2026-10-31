@@ -15,7 +15,7 @@ async function execute(language:{language:string;file:string},code:string,stdin:
  const response=await fetch('https://emkc.org/api/v2/piston/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({language:language.language,version:'*',files:[{name:language.file,content:code}],stdin,args:[],compile_timeout:10000,run_timeout:5000,run_memory_limit:128000000}),signal:AbortSignal.timeout(15000)});
  if(!response.ok)throw new Error('Execution provider returned HTTP '+response.status);
  const result=await response.json(),compile=result.compile||null,run=result.run||{};
- return {stdout:String(run.stdout||''),stderr:String(compile?.stderr||run.stderr||''),exitCode:typeof run.code==='number'?run.code:null,compileFailed:Boolean(compile?.code||compile?.stderr)};
+ return {stdout:String(run.stdout||''),stderr:String(compile?.stderr||run.stderr||''),exitCode:typeof run.code==='number'?run.code:null,compileFailed:Boolean(compile&&typeof compile.code==='number'&&compile.code!==0)};
 }
 export async function POST(req:Request){
  const userId=await getSessionUserId();if(!userId)return NextResponse.json({error:'Sign in required.'},{status:401});
