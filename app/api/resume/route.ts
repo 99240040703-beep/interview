@@ -27,26 +27,26 @@ const sectionPatterns: {name:string; aliases:string[]; weight:number; advice:str
   {name:'Additional Information',aliases:['activities','leadership','volunteering','languages','interests'],weight:5,advice:'Include relevant leadership, volunteering, languages or community contributions.'}
 ];
 function hasHeading(text:string, aliases:string[]) {
-  return aliases.some((a) => new RegExp('(^|\\n|\\s)' + a.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&') + '(\\s|:|$)', 'i').test(text));
+  const normalized = text.toLowerCase(); return aliases.some((alias) => normalized.includes(alias));
 }
 function analyze(text:string, targetRole:string) {
   const lower=text.toLowerCase();
-  const wordCount=(text.match(/\\b[\\w+#.-]+\\b/g)||[]).length;
-  const found=allSkills.filter(s=>new RegExp('(^|[^a-z0-9+#.])'+s.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')+'([^a-z0-9+#.]|$)','i').test(text));
+  const wordCount=(text.match(/\b[\w+#.-]+\b/g)||[]).length;
+  const found=allSkills.filter(s=>lower.includes(s));
   const groups=Object.entries(skillGroups).map(([name,items])=>({name,skills:found.filter(s=>items.includes(s))})).filter(g=>g.skills.length);
   const sections=sectionPatterns.map(s=>({name:s.name,present:hasHeading(text,s.aliases),weight:s.weight,advice:s.advice}));
   const present=sections.filter(s=>s.present);
   const missing=sections.filter(s=>!s.present);
-  const email= /[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i.test(text);
-  const phone=/(?:\\+?\\d[\\d\\s().-]{7,}\\d)/.test(text);
-  const linkedin=/linkedin\\.com\\/in\\//i.test(text);
-  const github=/github\\.com\\//i.test(text);
-  const portfolio=/(portfolio|behance\\.net|\w+\\.dev|vercel\\.app)/i.test(text);
-  const quantified=(text.match(/\\b\\d+(?:\\.\\d+)?\\s?(?:%|percent|x|k|m|users|customers|projects|hours|days|weeks|months)\\b/gi)||[]).length;
-  const bullets=(text.match(/^\\s*(?:[-*•▪]|\\d+[.)])\\s+/gm)||[]).length;
-  const actionCount=actionVerbs.filter(v=>new RegExp('\\b'+v+'\\b','i').test(text)).length;
-  const longLines=text.split(/\\r?\\n/).filter(line=>line.trim().length>220).length;
-  const dates=/(19|20)\\d{2}/.test(text);
+  const email= /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(text);
+  const phone=/(?:\+?\d[\d\s().-]{7,}\d)/.test(text);
+  const linkedin=/linkedin\.com\/in\//i.test(text);
+  const github=/github\.com\//i.test(text);
+  const portfolio=/(portfolio|behance\.net|\w+\.dev|vercel\.app)/i.test(text);
+  const quantified=(text.match(/\b\d+(?:\.\d+)?\s?(?:%|percent|x|k|m|users|customers|projects|hours|days|weeks|months)\b/gi)||[]).length;
+  const bullets=(text.match(/^\s*(?:[-*•▪]|\d+[.)])\s+/gm)||[]).length;
+  const actionCount=actionVerbs.filter(v=>lower.includes(v)).length;
+  const longLines=text.split(/\r?\n/).filter(line=>line.trim().length>220).length;
+  const dates=/(19|20)\d{2}/.test(text);
   const atsChecks=[
     {name:'Email address',passed:email,detail:email?'Contact email detected':'Add a professional email address'},
     {name:'Phone number',passed:phone,detail:phone?'Phone number detected':'Add a reachable phone number with country code'},
@@ -85,8 +85,8 @@ function analyze(text:string, targetRole:string) {
   if(wordCount<250) recommendations.push('Your resume looks short. Add relevant project details, internship responsibilities and outcomes.');
   if(wordCount>900) recommendations.push('Consider reducing repetition and keeping the resume concise (often one page for students and early-career applicants).');
   if(targetRole&&roleKeywords.length&&missingRole.length) recommendations.push('For '+targetRole+', consider demonstrating these relevant keywords where truthful: '+missingRole.join(', ')+'.');
-  const experienceLines=text.split(/\\r?\\n/).filter(l=>/\\b(built|developed|designed|implemented|managed|led|worked|intern|engineer|developer|analyst)\\b/i.test(l));
-  const projectLines=text.split(/\\r?\\n/).filter(l=>/\\b(project|application|website|system|platform|app|dashboard)\\b/i.test(l));
+  const experienceLines=text.split(/\r?\n/).filter(l=>/\b(built|developed|designed|implemented|managed|led|worked|intern|engineer|developer|analyst)\b/i.test(l));
+  const projectLines=text.split(/\r?\n/).filter(l=>/\b(project|application|website|system|platform|app|dashboard)\b/i.test(l));
   return {
     score,skills:found,skillGroups:groups,wordCount,
     metrics:{sectionScore,atsScore,contentScore,lengthScore,quantifiedAchievements:quantified,bulletPoints:bullets,actionVerbs:actionCount,sectionsFound:present.length,totalSections:sections.length},
