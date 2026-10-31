@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 type Analysis = {
   id:string; score:number; skills:string[]; skillGroups:{name:string;skills:string[]}[];
@@ -12,7 +12,7 @@ type Analysis = {
   contentReview:{experienceEvidence:string[];projectEvidence:string[];longLines:number};
 };
 function Meter({value}:{value:number}){return <div className="progress"><span style={{width:value+'%'}}/></div>}
-function Panel({title,children,sub}:{title:string;children:React.ReactNode;sub?:string}){return <section className="card" style={{marginTop:18}}><h2 style={{fontSize:19,margin:'0 0 6px'}}>{title}</h2>{sub&&<p className="muted" style={{marginTop:0}}>{sub}</p>}{children}</section>}
+function Panel({title,children,sub}:{title:string;children:ReactNode;sub?:string}){return <section className="card" style={{marginTop:18}}><h2 style={{fontSize:19,margin:'0 0 6px'}}>{title}</h2>{sub&&<p className="muted" style={{marginTop:0}}>{sub}</p>}{children}</section>}
 export default function Resume(){
   const [file,setFile]=useState<File|null>(null);
   const [text,setText]=useState('');
